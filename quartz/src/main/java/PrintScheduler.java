@@ -21,7 +21,7 @@ public class PrintScheduler {
 		}
 	}
 
-	private Properties loadProperties() throws FileNotFoundException,IOException {
+	private Properties loadProperties() throws IOException {
 		Properties properties = new Properties();
 		try (InputStream fis = PrintScheduler.class.getResourceAsStream("quartz.properties")) {
 			properties.load(fis);
