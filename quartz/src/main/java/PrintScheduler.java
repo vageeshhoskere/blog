@@ -1,5 +1,6 @@
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import ramstore.PrintStatefulJob;
 
 import java.io.*;
 import java.util.Properties;
@@ -30,7 +31,8 @@ public class PrintScheduler {
 	}
 
 	public void schedule() throws SchedulerException {
-		JobDetail job = newJob(PrintJob.class).withIdentity("printjob", "printjobgroup").build();
+		JobDetail job = newJob(PrintStatefulJob.class).withIdentity("printjob", "printjobgroup").build();
+		job.getJobDataMap().put("count",0);
 		Trigger trigger = TriggerBuilder.newTrigger().withIdentity("printTrigger", "printtriggergroup")
 				.startNow().withSchedule(simpleSchedule().withIntervalInMilliseconds(100l).repeatForever()).build();
 		scheduler.scheduleJob(job, trigger);
