@@ -2,6 +2,7 @@ package ramstore;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.KeyMatcher;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -20,8 +21,9 @@ public class PrintRamScheduler {
 	}
 
 	public void schedule() throws SchedulerException {
+		JobKey jobKey = JobKey.jobKey("printjob", "printjobgroup");
 		//create a job
-		JobDetail job = newJob(PrintStatefulJob.class).withIdentity("printjob", "printjobgroup").build();
+		JobDetail job = newJob(PrintStatefulJob.class).withIdentity(jobKey).build();
 		//put a count variable that we can keep incrementing
 		job.getJobDataMap().put("count",0);
 		//create a trigger
@@ -29,6 +31,8 @@ public class PrintRamScheduler {
 				.startNow().withSchedule(simpleSchedule().withIntervalInMilliseconds(100l).repeatForever()).build();
 		//schedule the job
 		scheduler.scheduleJob(job, trigger);
+		//add a listner only for specific job - It is also possible to add a generic listener for all jobs
+		scheduler.getListenerManager().addJobListener(new PrintJobListener(), KeyMatcher.keyEquals(jobKey));
 	}
 
 	public void stopScheduler() throws SchedulerException {
@@ -40,7 +44,7 @@ public class PrintRamScheduler {
 		PrintRamScheduler printScheduler = new PrintRamScheduler();
 		try {
 			printScheduler.schedule();
-			Thread.sleep(60000l);
+			Thread.sleep(10000l);
 			printScheduler.stopScheduler();
 		} catch (Exception e) {
 			e.printStackTrace();
